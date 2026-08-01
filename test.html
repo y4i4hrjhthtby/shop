@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تست اتصال بک‌اند</title>
+<style>
+  body{ font-family: Tahoma, sans-serif; background:#0A0E17; color:#E8ECF4; padding:20px; line-height:1.8; }
+  button{ background:#00D9B5; color:#04120F; border:none; padding:14px 24px; border-radius:9px; font-weight:bold; font-size:15px; width:100%; margin-bottom:16px; }
+  #result{ background:#111827; border:1px solid #2A3348; border-radius:10px; padding:16px; white-space:pre-wrap; word-break:break-all; font-family:monospace; font-size:13px; direction:ltr; text-align:left; }
+  .ok{ color:#00D9B5; } .err{ color:#F16A6A; }
+  h2{ margin-bottom:16px; }
+</style>
+</head>
+<body>
+  <h2>🔍 تست اتصال به بک‌اند</h2>
+  <button onclick="runTest('get')">تست ۱: درخواست GET ساده</button>
+  <button onclick="runTest('simple')">تست ۲: POST بدون Preflight</button>
+  <button onclick="runTest('json')">تست ۳: POST با JSON (اصلی)</button>
+  <div id="result">نتیجه اینجا نمایش داده می‌شه...</div>
+
+  <script>
+    const BACKEND_URL = 'https://shiny-cake-e6e1.gei3y3igeir4i.workers.dev';
+    async function runTest(type){
+      const box = document.getElementById('result');
+      box.textContent = 'در حال تست...';
+      box.className = '';
+      try{
+        let res;
+        if(type === 'get'){
+          res = await fetch(BACKEND_URL, { method:'GET' });
+        } else if(type === 'simple'){
+          res = await fetch(BACKEND_URL, { method:'POST', headers:{ 'Content-Type':'text/plain' }, body: JSON.stringify({ action:'login_admin', password:'qwer4321' }) });
+        } else {
+          res = await fetch(BACKEND_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'login_admin', password:'qwer4321' }) });
+        }
+        const text = await res.text();
+        let parsed; try{ parsed = JSON.parse(text); } catch(e){ parsed = null; }
+        box.className = 'ok';
+        box.textContent = '✓ درخواست موفق بود [نوع: ' + type + ']\\n\\nHTTP Status: ' + res.status + '\\n\\nپاسخ:\\n' + (parsed ? JSON.stringify(parsed, null, 2) : text);
+      } catch(err){
+        box.className = 'err';
+        box.textContent = '✗ درخواست ناموفق بود [نوع: ' + type + ']\\n\\nنوع خطا: ' + err.name + '\\nپیام: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
